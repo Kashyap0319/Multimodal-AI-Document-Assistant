@@ -2,10 +2,14 @@
 
 > **Ever wished you could chat with Alice in Wonderland? Or have Gulliver explain his wild travels? Now you can!**
 
+**🎉 FULLY FUNCTIONAL PROJECT - All Features Working! 🎉**
+
 This isn't your grandma's book club. This is an **AI-powered storytelling companion** that brings classic literature to life with:
 - 🎭 **Witty, sarcastic commentary** (because who reads boring summaries?)
 - 🎨 **AI-generated vintage illustrations** (straight out of a 1920s storybook)
 - 🎙️ **Voice narration** (like having a storyteller in your pocket)
+- 🎤 **Voice input** (ChatGPT-style recording with live duration timer)
+- 💬 **Follow-up suggestions** (contextual question recommendations)
 - 📖 **Actual book sources** (no hallucinations, we promise!)
 
 ## 🚀 What Makes This Cool?
@@ -66,10 +70,33 @@ All in less time than it takes to find the chapter yourself!
 
 - **Python 3.9+** (check: `python --version`)
 - **Node.js 18+** (check: `node --version`)
+- **FFmpeg** (for voice transcription - see installation below)
 - **3 Free API Keys** (takes 2 mins total):
   - [Google Gemini](https://makersuite.google.com/app/apikey) - Free tier is generous
   - [Stability AI](https://platform.stability.ai/) - $10 free credits
   - [ElevenLabs](https://elevenlabs.io/) - 10,000 free characters/month
+
+### Installing FFmpeg (Required for Voice Input)
+
+**Windows:**
+```powershell
+# Download and install via winget
+winget install --id=Gyan.FFmpeg -e
+
+# Or download manually from https://ffmpeg.org/download.html
+# Add to PATH environment variable
+```
+
+**macOS:**
+```bash
+brew install ffmpeg
+```
+
+**Linux:**
+```bash
+sudo apt install ffmpeg  # Ubuntu/Debian
+sudo yum install ffmpeg  # CentOS/RHEL
+```
 
 ### Quick Setup
 
@@ -136,8 +163,21 @@ Go to **http://localhost:5173** and start chatting! 🎉
 3. Enjoy the witty response, image, and narration!
 4. Click "View Sources" to see where the answer came from
 
+### Voice Input (NEW! ✨)
+1. **Click the microphone button** at the bottom left
+2. **Speak your question clearly** (you'll see "Recording 2.3s" with a blinking red dot)
+3. **Click mic again to stop** (shows square icon while recording)
+4. **Transcription appears** in the input box - edit if needed
+5. **Press Enter** to send your question!
+
+**Requirements for Voice Input:**
+- FFmpeg must be installed (see setup below)
+- Works in modern browsers (Chrome, Edge, Firefox)
+- Powered by OpenAI Whisper for accurate transcription
+
 ### Pro Tips
-- **Click the mic icon** to ask questions with your voice (coming soon!)
+- **Use voice input** for hands-free questions - just like ChatGPT!
+- **Click follow-up suggestions** after each answer to continue the conversation
 - **Try different languages** - It can respond in Spanish, French, Hindi, and more!
 - **Ask follow-up questions** - It remembers your conversation
 - **Test the limits** - Ask something random to see the witty fallback response
@@ -163,13 +203,15 @@ No hallucinations, no making stuff up - just honest, witty redirects!
 - **Source Citations** - See exactly which book pages were used
 - **Beautiful UI** - Glass morphism design, smooth animations, rotating suggestions
 - **Vintage Illustrations** - Every image looks like it belongs in a 1920s storybook
+- **Voice Input** ✨ - ChatGPT-style recording with Whisper transcription
+- **Follow-up Suggestions** - Contextual question recommendations after each answer
 
 ### 🎁 Bonus Features
 - **Voice Narration** - Professional storyteller voice reads every answer
 - **Multi-Language Support** - Chat in English, Spanish, French, German, Hindi, Chinese, Japanese, Arabic, Portuguese, or Russian
 - **Image Generation** - Get a custom illustration with every response
 - **Conversation Memory** - Remembers the last 6 messages for context
-- **Voice Input** - Coming soon: Ask questions by speaking!
+- **Simple Recording UI** - Minimalist design with duration timer (not fancy, just functional)
 
 ## 📊 Behind the Scenes
 
@@ -294,7 +336,8 @@ Stability AI can be unpredictable! Try:
 
 ## 🚀 What's Next? (Future Ideas)
 
-- [ ] **Voice Input** - Ask questions by speaking
+- [x] **Voice Input** ✅ - Ask questions by speaking (COMPLETED!)
+- [x] **Follow-up Suggestions** ✅ - Contextual question recommendations (COMPLETED!)
 - [ ] **More Books** - Add Sherlock Holmes, Dracula, Grimm's Fairy Tales
 - [ ] **User Uploads** - Let anyone upload their own PDFs
 - [ ] **Chat History** - Save conversations for later

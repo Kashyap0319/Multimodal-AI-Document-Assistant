@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
-import { BookOpen, Send, Sparkles, Volume2, Image as ImageIcon, Mic, MicOff, Globe, Plus, Settings, Moon, Sun, Menu, X, Clock, MessageSquare } from 'lucide-react'
+import { BookOpen, Send, Sparkles, Volume2, Image as ImageIcon, Mic, Square, Globe, Plus, Settings, Moon, Sun, Menu, X, Clock, MessageSquare } from 'lucide-react'
 import './App.css'
 import ChatMessage from './components/ChatMessage'
 import SuggestionPill from './components/SuggestionPill'
@@ -17,11 +17,13 @@ function App() {
   const [selectedLanguage, setSelectedLanguage] = useState('en')
   const [isRecording, setIsRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState(null)
+  const [recordingDuration, setRecordingDuration] = useState(0)
   const [sessionId, setSessionId] = useState(() => `session_${Date.now()}`)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [darkMode, setDarkMode] = useState(false)
   const [chatHistory, setChatHistory] = useState([])
   const [currentChatTitle, setCurrentChatTitle] = useState('')
+  const [followUpSuggestions, setFollowUpSuggestions] = useState([])
   const messagesEndRef = useRef(null)
 
   // Fetch suggestions and languages on mount
@@ -88,10 +90,73 @@ function App() {
     setSessionId(`session_${Date.now()}`)
     setCurrentChatTitle('')
     setInputValue('')
+    setFollowUpSuggestions([])
   }
 
   const toggleDarkMode = () => {
     setDarkMode(prev => !prev)
+  }
+
+  const generateFollowUpSuggestions = (question, answer) => {
+    // Extract key topics from question and answer
+    const text = (question + ' ' + answer).toLowerCase()
+    const followUps = []
+
+    // Topic-based follow-up questions
+    if (text.includes('alice') || text.includes('wonderland')) {
+      followUps.push(
+        "What happened next in Alice's adventure?",
+        "Tell me more about the characters Alice met",
+        "What was the most bizarre thing Alice saw?"
+      )
+    }
+    if (text.includes('hatter') || text.includes('tea party')) {
+      followUps.push(
+        "Who else was at the tea party?",
+        "Why was the Hatter so mad?",
+        "What riddles did they ask at the tea party?"
+      )
+    }
+    if (text.includes('queen') || text.includes('hearts')) {
+      followUps.push(
+        "What did the Queen of Hearts do?",
+        "How did Alice deal with the Queen?",
+        "What was the Queen's famous saying?"
+      )
+    }
+    if (text.includes('gulliver') || text.includes('lilliput')) {
+      followUps.push(
+        "How did Gulliver escape?",
+        "What were the Lilliputians like?",
+        "What adventures came next for Gulliver?"
+      )
+    }
+    if (text.includes('cheshire') || text.includes('cat')) {
+      followUps.push(
+        "What advice did the Cheshire Cat give?",
+        "Why could the cat disappear?",
+        "What was the cat's riddle?"
+      )
+    }
+    if (text.includes('arabian') || text.includes('nights') || text.includes('aladdin') || text.includes('sinbad')) {
+      followUps.push(
+        "Tell me another Arabian Nights story",
+        "What magical items appeared in the tales?",
+        "How did the story end?"
+      )
+    }
+
+    // Generic follow-ups if no specific topic matched
+    if (followUps.length === 0) {
+      followUps.push(
+        "Tell me more about that",
+        "What happened next in the story?",
+        "Who were the other characters involved?"
+      )
+    }
+
+    // Set only first 3 unique suggestions
+    setFollowUpSuggestions([...new Set(followUps)].slice(0, 3))
   }
 
   const handleSend = async (question = null) => {
@@ -129,6 +194,9 @@ function App() {
       }
 
       setMessages(prev => [...prev, botMessage])
+      
+      // Generate follow-up suggestions based on the topic
+      generateFollowUpSuggestions(textToSend, response.data.answer)
     } catch (error) {
       console.error('Error:', error)
       
@@ -146,9 +214,31 @@ function App() {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const recorder = new MediaRecorder(stream)
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      })
+      
+      // Use better audio format if available
+      let options
+      try {
+        options = { mimeType: 'audio/webm;codecs=opus' }
+        new MediaRecorder(stream, options)
+      } catch (e) {
+        options = { mimeType: 'audio/webm' }
+      }
+      
+      const recorder = new MediaRecorder(stream, options)
       const chunks = []
+      let recordingStartTime = Date.now()
+      
+      // Start duration timer
+      const durationInterval = setInterval(() => {
+        setRecordingDuration((Date.now() - recordingStartTime) / 1000)
+      }, 100)
 
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
@@ -157,13 +247,20 @@ function App() {
       }
       
       recorder.onstop = async () => {
-        console.log('🎤 Recording stopped, processing...')
+        clearInterval(durationInterval)
+        setRecordingDuration(0)
+        
+        const duration = (Date.now() - recordingStartTime) / 1000
+        console.log('🎤 Recording stopped, duration:', duration.toFixed(1), 'seconds')
+        
         const blob = new Blob(chunks, { type: 'audio/webm' })
         console.log('📦 Audio blob size:', blob.size, 'bytes')
         
-        if (blob.size === 0) {
-          alert('❌ No audio recorded. Please try again.')
-          stream.getTracks().forEach(track => track.stop())
+        // Stop stream tracks
+        stream.getTracks().forEach(track => track.stop())
+        
+        if (blob.size < 1000) {
+          alert('❌ No audio detected. Please try again and speak clearly.')
           return
         }
         
@@ -182,20 +279,20 @@ function App() {
           setInputValue(response.data.text)
           setIsLoading(false)
           
-          // Auto-submit after transcription
+          // Focus input for editing
           setTimeout(() => {
-            if (response.data.text && response.data.text.trim()) {
-              handleSend(response.data.text)
-            }
-          }, 500)
+            document.querySelector('.chat-input')?.focus()
+          }, 100)
           
         } catch (error) {
           console.error('❌ Transcription error:', error)
-          alert('Failed to transcribe audio. Please try typing instead.')
           setIsLoading(false)
+          
+          const errorMsg = error.response?.data?.detail || error.message || 'Unknown error'
+          console.error('Full error:', errorMsg)
+          
+          alert(`❌ Failed to transcribe audio.\n\n${errorMsg}\n\nPlease try typing your question instead.`)
         }
-
-        stream.getTracks().forEach(track => track.stop())
       }
 
       recorder.start()
@@ -213,6 +310,14 @@ function App() {
       mediaRecorder.stop()
       setIsRecording(false)
       setMediaRecorder(null)
+    }
+  }
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording()
+    } else {
+      startRecording()
     }
   }
 
@@ -365,6 +470,24 @@ function App() {
               <ChatMessage key={idx} message={msg} />
             ))}
 
+            {/* Follow-up suggestions after last message */}
+            {!isLoading && messages.length > 0 && followUpSuggestions.length > 0 && (
+              <div className="follow-up-suggestions">
+                <p className="follow-up-title">💡 Continue exploring:</p>
+                <div className="follow-up-pills">
+                  {followUpSuggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      className="follow-up-pill"
+                      onClick={() => handleSend(suggestion)}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {isLoading && (
               <div className="loading-indicator-modern">
                 <div className="loading-dots">
@@ -383,13 +506,21 @@ function App() {
         {/* Input Area - Fixed at bottom */}
         <div className="input-area-modern">
           <div className="input-wrapper">
+            {/* Simple recording indicator like ChatGPT */}
+            {isRecording && (
+              <div className="recording-indicator">
+                <div className="recording-dot"></div>
+                <span>Recording {recordingDuration.toFixed(1)}s</span>
+              </div>
+            )}
+            
             <button
-              onClick={isRecording ? stopRecording : startRecording}
+              onClick={toggleRecording}
               className={`mic-button-modern ${isRecording ? 'recording' : ''}`}
               disabled={isLoading}
               title={isRecording ? 'Stop recording' : 'Voice input'}
             >
-              {isRecording ? <MicOff size={20} /> : <Mic size={20} />}
+              {isRecording ? <Square size={16} fill="white" /> : <Mic size={20} />}
             </button>
             
             <input
@@ -397,14 +528,14 @@ function App() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask about Alice, Gulliver, or Arabian adventures..."
-              disabled={isLoading}
-              className="chat-input-modern"
+              placeholder={isRecording ? "Listening..." : "Ask about Alice, Gulliver, or Arabian adventures..."}
+              disabled={isLoading || isRecording}
+              className="chat-input-modern chat-input"
             />
             
             <button
               onClick={() => handleSend()}
-              disabled={!inputValue.trim() || isLoading}
+              disabled={!inputValue.trim() || isLoading || isRecording}
               className="send-button-modern"
               title="Send message"
             >

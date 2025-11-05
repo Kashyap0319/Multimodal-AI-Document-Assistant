@@ -429,27 +429,53 @@ class Storyteller:
             if not os.path.exists(audio_path):
                 raise Exception(f"Audio file not found: {audio_path}")
             
-            # Transcribe (Whisper handles various audio formats including webm)
+            # Check file size
+            file_size = os.path.getsize(audio_path)
+            logger.info(f"📦 Audio file size: {file_size} bytes")
+            
+            if file_size < 1000:  # Less than 1KB
+                logger.warning(f"⚠️ Audio file too small: {file_size} bytes")
+                return "Recording too short or empty. Please speak clearly for at least 1-2 seconds."
+            
+            # Check if FFmpeg is available
+            import shutil
+            ffmpeg_path = shutil.which("ffmpeg")
+            if not ffmpeg_path:
+                logger.error("❌ FFmpeg not found in PATH")
+                raise Exception("FFmpeg not found. Please install FFmpeg and add it to your system PATH, then restart the backend.")
+            
+            logger.info(f"✅ FFmpeg found at: {ffmpeg_path}")
+            
+            # Transcribe with language hint (Whisper handles various audio formats including webm)
+            logger.info(f"🎯 Starting Whisper transcription...")
             result = await asyncio.to_thread(
                 self.whisper_model.transcribe,
                 audio_path,
-                fp16=False  # Disable fp16 for CPU compatibility
+                fp16=False,  # Disable fp16 for CPU compatibility
+                language='en',  # Hint English for better accuracy
+                task='transcribe'
             )
             
             text = result["text"].strip()
             
             if not text:
                 logger.warning("⚠️ Transcription returned empty text")
-                return "Sorry, I couldn't hear anything. Please try again."
+                return "Sorry, I couldn't hear anything clearly. Please speak louder and try again."
             
-            logger.info(f"✅ Audio transcribed: {text[:100]}...")
+            logger.info(f"✅ Audio transcribed successfully: {text[:100]}...")
             return text
             
         except Exception as e:
             logger.error(f"❌ Error transcribing audio: {str(e)}")
             import traceback
             logger.error(traceback.format_exc())
-            raise Exception(f"Transcription failed: {str(e)}")
+            
+            # Provide helpful error message based on error type
+            error_msg = str(e)
+            if "ffmpeg" in error_msg.lower() or "av" in error_msg.lower():
+                raise Exception("FFmpeg not found. Please install FFmpeg to use audio transcription. Download from: https://ffmpeg.org/download.html")
+            else:
+                raise Exception(f"Transcription failed: {str(e)}")
     
     def _create_image_prompt(self, question: str, answer: str) -> str:
         """

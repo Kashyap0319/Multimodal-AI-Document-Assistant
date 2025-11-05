@@ -1,0 +1,35 @@
+.voice-visualizer {
+  position: fixed;
+  bottom: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(17, 24, 39, 0.95);
+  backdrop-filter: blur(12px);
+  padding: 20px 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.voice-visualizer canvas {
+  display: block;
+  border-radius: 8px;
+}
+
+/* Dark mode */
+.dark-mode .voice-visualizer {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 40px rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}

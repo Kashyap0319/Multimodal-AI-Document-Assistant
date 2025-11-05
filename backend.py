@@ -118,23 +118,33 @@ async def get_languages():
 @app.post("/api/transcribe")
 async def transcribe_audio(audio: UploadFile = File(...)):
     """Transcribe audio to text using Whisper"""
+    temp_path = None
     try:
         logger.info(f"🎤 Received audio file: {audio.filename}, type: {audio.content_type}")
         
         # Save uploaded file temporarily with original extension
-        file_ext = os.path.splitext(audio.filename)[1] or ".webm"
-        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as temp_file:
+        file_ext = os.path.splitext(audio.filename)[1] if audio.filename else ".webm"
+        if not file_ext:
+            file_ext = ".webm"
+            
+        # Create temp file but keep it open so Windows doesn't delete it
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=file_ext)
+        try:
             content = await audio.read()
             temp_file.write(content)
+            temp_file.flush()  # Ensure data is written to disk
             temp_path = temp_file.name
+        finally:
+            temp_file.close()  # Close but don't delete yet
         
         logger.info(f"📁 Saved to: {temp_path}, size: {os.path.getsize(temp_path)} bytes")
         
+        # Verify file exists and is readable
+        if not os.path.exists(temp_path):
+            raise Exception(f"Temp file not found: {temp_path}")
+        
         # Transcribe
         text = await storyteller.transcribe_audio(temp_path)
-        
-        # Clean up
-        os.unlink(temp_path)
         
         logger.info(f"✅ Transcription successful: {text[:50]}...")
         return {"text": text}
@@ -144,6 +154,14 @@ async def transcribe_audio(audio: UploadFile = File(...)):
         import traceback
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
+    finally:
+        # Clean up temp file
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.unlink(temp_path)
+                logger.info(f"🗑️ Cleaned up temp file: {temp_path}")
+            except Exception as e:
+                logger.warning(f"⚠️ Could not delete temp file {temp_path}: {e}")
 
 
 @app.post("/api/chat", response_model=ChatResponse)
