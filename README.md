@@ -4,6 +4,26 @@
 
 **🎉 FULLY FUNCTIONAL PROJECT - All Features Working! 🎉**
 
+---
+
+### 🚀 **NEW USER? Start Here!**
+
+```powershell
+# 1. Clone the repo
+git clone https://github.com/Kashyap0319/AI-Internship-Project-EsMagico-.git
+cd AI-Internship-Project-EsMagico-
+
+# 2. Run one-click setup (installs everything!)
+.\SETUP.bat
+
+# 3. Add API keys when prompted, then start
+.\START.bat
+```
+
+**Done! App opens automatically in browser.** 🎉
+
+---
+
 This isn't your grandma's book club. This is an **AI-powered storytelling companion** that brings classic literature to life with:
 - 🎭 **Witty, sarcastic commentary** (because who reads boring summaries?)
 - 🎨 **AI-generated vintage illustrations** (straight out of a 1920s storybook)
@@ -64,17 +84,43 @@ All in less time than it takes to find the chapter yourself!
 
 **No expensive GPUs needed!** Everything runs on APIs, so your laptop won't catch fire 🔥
 
-## 🛠️ Get It Running (5 Minutes!)
+## 🛠️ Get It Running (2 Minutes!)
 
 ### What You'll Need
 
 - **Python 3.9+** (check: `python --version`)
 - **Node.js 18+** (check: `node --version`)
-- **FFmpeg** (for voice transcription - see installation below)
-- **3 Free API Keys** (takes 2 mins total):
+- **FFmpeg** (for voice transcription - auto-checked by setup)
+- **2 Free API Keys** (takes 2 mins total):
   - [Google Gemini](https://makersuite.google.com/app/apikey) - Free tier is generous
-  - [Stability AI](https://platform.stability.ai/) - $10 free credits
   - [ElevenLabs](https://elevenlabs.io/) - 10,000 free characters/month
+
+### 🚀 Quick Start (One-Click Setup!)
+
+**For New Users - Easiest Way:**
+
+```powershell
+# 1. Download/Clone the project
+git clone https://github.com/Kashyap0319/AI-Internship-Project-EsMagico-.git
+cd AI-Internship-Project-EsMagico-
+
+# 2. Run automatic setup (installs everything!)
+.\SETUP.bat
+
+# 3. Add your API keys to .env (opens automatically)
+# 4. Add your PDF books to data/pdfs/ folder
+# 5. Start the app
+.\START.bat
+```
+
+**That's it! The app opens automatically in your browser!** 🎉
+
+---
+
+### 📝 Manual Setup (Advanced Users)
+
+<details>
+<summary>Click to expand manual installation steps</summary>
 
 ### Installing FFmpeg (Required for Voice Input)
 
@@ -104,56 +150,45 @@ sudo yum install ffmpeg  # CentOS/RHEL
 
 Drop your PDFs into the `data/pdfs/` folder. We've got Alice in Wonderland and Gulliver's Travels ready to go!
 
-```powershell
-# Already have these? Skip this step!
-copy "path\to\Alice_In_Wonderland.pdf" "data\pdfs\"
-copy "path\to\Gullivers_Travels.pdf" "data\pdfs\"
-```
-
 #### 2️⃣ Add Your API Keys
 
-```powershell
-# Copy the template
-copy .env.example .env
+Create a `.env` file in the root folder:
 
-# Open and add your keys
-notepad .env
-```
-
-Paste in your API keys:
 ```env
 GEMINI_API_KEY=your_gemini_key_here
-STABILITY_API_KEY=your_stability_key_here
 ELEVENLABS_API_KEY=your_elevenlabs_key_here
 ```
 
-#### 3️⃣ Start the Backend
+#### 3️⃣ Install Dependencies
 
 ```powershell
-# Install Python stuff
+# Install Python dependencies
 pip install -r requirements.txt
 
-# Fire it up! (this will process the PDFs first time)
-python backend.py
+# Install Node dependencies
+cd frontend
+npm install
+cd ..
 ```
 
-**Wait for:** `✨ Loaded 939 chunks from 2 books!` - Now you're ready!
-
-#### 4️⃣ Start the Frontend (New Terminal!)
+#### 4️⃣ Start the App
 
 ```powershell
-cd frontend
+# Start both servers
+.\START.bat
 
-# Install React stuff
-npm install
-
-# Launch the UI
-npm run dev
+# Or manually:
+# Terminal 1: python backend.py
+# Terminal 2: cd frontend && npm run dev
 ```
 
 #### 5️⃣ Open Your Browser!
 
 Go to **http://localhost:5173** and start chatting! 🎉
+
+</details>
+
+---
 
 ## 🎮 How to Use
 
