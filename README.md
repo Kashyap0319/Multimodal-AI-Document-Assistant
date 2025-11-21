@@ -2,8 +2,6 @@
 
 > **Ever wished you could chat with Alice in Wonderland? Or have Gulliver explain his wild travels? Now you can!**
 
-**🎉 FULLY FUNCTIONAL PROJECT - All Features Working! 🎉**
-
 ---
 
 ### 🎥 **Watch Demo Video**
@@ -38,7 +36,7 @@ This isn't your grandma's book club. This is an **AI-powered storytelling compan
 - 🎙️ **Voice narration** (like having a storyteller in your pocket)
 - 🎤 **Voice input** (ChatGPT-style recording with live duration timer)
 - 💬 **Follow-up suggestions** (contextual question recommendations)
-- 📖 **Actual book sources** (no hallucinations, we promise!)
+- 📖 **Actual book sources** (no hallucinations, I promise!)
 
 ## 🚀 What Makes This Cool?
 
